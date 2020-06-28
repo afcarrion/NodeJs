@@ -1,27 +1,47 @@
-const db = require("mongoose");
 const Model = require("./model");
-
-/* mongodb+srv://user:user123@cluster0-m7wl6.mongodb.net/telegrame?retryWrites=true&w=majority */
-db.Promise = global.Promise;
-
-db.connect(
-  "mongodb+srv://user:user123@cluster0-m7wl6.mongodb.net/telegrame?retryWrites=true&w=majority",
-  { useNewUrlParser: true }
-);
-console.log("Conexion ok");
 
 function addMessage(message) {
   const myMessage = new Model(message);
   myMessage.save();
-  console.log(message);
 }
 
-async function getMessages() {
-  const messages = await Model.find();
-  return messages;
+async function getMessages(filterUser) {
+  return new Promise((resolve, reject) =>{
+    let filter = {};
+    if(filterUser !== null){
+      filter = { user: filterUser }
+    }
+    Model.find(filter)
+      .populate('user')
+      .exec((error, populated)=>{
+        if(error){
+          reject(error);
+          return false;
+        }
+        resolve(populated);
+      });
+  })
+
+}
+
+async function updateText(id, message){
+  const foundMessage = await Model.findOne({
+    _id: id
+  })
+  foundMessage.message = message;
+  const newMessage = await foundMessage.save();
+  return newMessage;
+}
+
+async function removeMessage(id){
+  return Model.deleteOne({
+    _id: id,
+  });
 }
 
 module.exports = {
   add: addMessage,
   list: getMessages,
+  updateText: updateText,
+  remove: removeMessage,
 };
