@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const server  = require('http').Server(app);
 
+const cors = require('cors');
 const bodyParser = require("body-parser");
 const socket = require('./socket')
 const db = require('./db')
@@ -10,7 +11,7 @@ const router = require("./network/routes");
 db("mongodb://localhost:27017/telegrame");
 
 
-
+app.use(cors());
 /* app.use("/", function (req, res) {
   res.send("Hola");
 }); */
